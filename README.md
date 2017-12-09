@@ -1,2 +1,0 @@
-# metaparticler
-by spinLocks
