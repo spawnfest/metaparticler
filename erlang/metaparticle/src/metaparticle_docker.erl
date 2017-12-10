@@ -34,16 +34,32 @@ make_image_name(#{ repository := Repo, name := Name } = P) ->
 
 write_dockerfile(P) ->
     NewP = validate_package_map(P),
-    Template = <<"FROM erlang:{{otp_version}}
+    Raw = <<"FROM erlang:{{otp_version}}
 
 COPY ./ /{{name}}/
 WORKDIR /{{name}}
 RUN rebar3 as {{env}} release
-CMD [\"/{{name}}/_build/{{env}}/rel/{{name}}/bin/{{name}}\"]">>,
+CMD [\"/{{name}}/_build/{{env}}/rel/{{name}}/bin/{{name}}\", \"start\"]">>,
     
-    Out = bbmustache:render(Template, NewP),
+    Template = bbmustache:parse_binary(Raw),
+    Out = bbmustache:compile(Template, binmap(NewP)),
     ok = file:write_file("Dockerfile", Out),
     {ok, NewP}.
+
+%% This function makes a temporary map just for templating
+binmap(M) ->
+    M0 = lists:foldl(fun(K, Acc) -> 
+		    V = maps:get(K, M),
+		    maps:put(atom_to_list(K), V, Acc)
+		end,
+                #{},
+		[name, env, otp_version]),
+    maps:map(fun(_K,V) -> to_binary(V) end, M0).
+
+to_binary(X) when is_integer(X) -> integer_to_binary(X);
+to_binary(X) when is_list(X) -> list_to_binary(X);
+to_binary(X) when is_atom(X) -> atom_to_binary(X, utf8);
+to_binary(X) when is_binary(X) -> X.
 
 validate_package_map(P) ->
     lists:foldl(fun present_or_default/2, P, 
