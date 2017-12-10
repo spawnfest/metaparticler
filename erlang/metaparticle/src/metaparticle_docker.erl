@@ -74,7 +74,8 @@ run(Runtime, #{ name := N, image := I }) ->
     Ports = maybe_make_ports(Runtime),
     os:cmd("docker run -rm --name " ++ N ++ " " 
             ++ Ports 
-	    ++ " -d " ++ I).
+	    ++ " -d " ++ I),
+    os:cmd("docker logs -f " ++ I).
 
 maybe_make_ports(R) ->
     case maps:is_key(ports, R) of
