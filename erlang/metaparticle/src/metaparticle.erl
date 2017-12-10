@@ -44,7 +44,7 @@ in_docker_container() ->
     end.
 
 check_filesystem() ->
-    case filelib:is_regular_file(?CGROUP_FILE) of
+    case filelib:is_regular(?CGROUP_FILE) of
        true -> read_cgroup_data();
        false -> false
     end.

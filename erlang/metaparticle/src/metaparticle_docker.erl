@@ -30,7 +30,7 @@ build(P) ->
 
 make_image_name(#{ repository := Repo, name := Name } = P) ->
     Image = Repo ++ "/" ++ Name ++ ":latest",
-    map:put(image, Image, P).
+    maps:put(image, Image, P).
 
 write_dockerfile(P) ->
     NewP = validate_package_map(P),

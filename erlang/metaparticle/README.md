@@ -30,11 +30,11 @@ start() ->
     Runtime = #{ executor => docker },
 
     Package = #{ builder => docker,
-                 name => example,
-                 repository => <<YOURNAME>>,
+                 name => <<"example">>,
+                 repository => <<"example">>,
                  publish => false,
-                 otp_version => 20,
-                 env => "dev"
+                 otp_version => <<"20">>,
+                 env => <<"dev">>
                },
 
     metaparticle:containerize(Runtime, Package, fun do_start/0).
@@ -60,8 +60,29 @@ You must also have [Docker][3] installed and running on your system.
 
 Try typing `docker` at your command line to see if it's readily available.
 
+### Options ###
+
+This implementation uses the [rebar3 release][4] mechanism to create
+bootable Erlang applications.  It invokes rebar3 in the container
+with an `env` parameter like this:
+
+    rebar3 as {{env}} release
+
+In the rebar.config, if you need special release overlays or other
+release configuration, make sure you put those into the appropriate
+rebar profile.
+
+This implementation uses the "official" Docker base Erlang 
+containers. There are containers available for Erlang 17 and
+after.  These are updated frequently; the most current release
+is 20.1.7. To control which version of Erlang is packaged with
+your application, set `otp_version` to the appropriate value 
+in the package map.
+
 TODO
 ----
+
+* Consider if this should be implemented as a rebar3 plugin.
 
 * Consider using [erlexec][2] for better control with full Erlang idioms when
   dealing with external commands.
