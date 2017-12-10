@@ -39,7 +39,7 @@ write_dockerfile(P) ->
 COPY ./ /{{name}}/
 WORKDIR /{{name}}
 RUN rebar3 release
-CMD [\"/{{name}}/_build/default/rel/{{name}}/bin/{{name}}\", \"console\"]">>,
+CMD [\"/{{name}}/_build/default/rel/{{name}}/bin/{{name}}\", \"start\"]">>,
     
     Template = bbmustache:parse_binary(Raw),
     Out = bbmustache:compile(Template, binmap(NewP)),
@@ -88,7 +88,7 @@ cancel(_Runtime, #{ name := Name }) ->
 
 run(Runtime, #{ name := N, image := I }) ->
     Ports = maybe_make_ports(Runtime),
-    os:cmd("docker run -rm -e METAPARTICLE_IN_CONTAINER=true --name " ++ N ++ " " 
+    os:cmd("docker run -rm -e METAPARTICLE_IN_CONTAINER=1 --name " ++ N ++ " " 
             ++ Ports 
 	    ++ " -d " ++ I),
     os:cmd("docker logs -f " ++ I).
