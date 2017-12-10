@@ -2,7 +2,7 @@
 
 %% API exports
 -export([
-    containerize/2
+    containerize/3
 ]).
 
 % runtime
@@ -38,7 +38,7 @@ containerize(Runtime, Package, Fun) ->
 %%====================================================================
 
 in_docker_container() ->
-    case os.getenv("METAPARTICLE_IN_CONTAINER") of
+    case os:getenv("METAPARTICLE_IN_CONTAINER") of
     	false -> check_filesystem();
 	_ -> true
     end.
@@ -56,14 +56,14 @@ read_cgroup_data() ->
               Parts).
 
 build_container(#{ builder := docker } = P) -> 
-    metaparticle_docker:build(Runtime, P);
+    metaparticle_docker:build(P);
 build_container(#{ builder := Builder }) ->
     erlang:error({error, invalid_builder}, [Builder]);
 build_container(Package) ->
     %% if there's no builder key, the default is docker.
     metaparticle_docker:build(Package).
 
-maybe_publish(#{ publish = true } = P) ->
+maybe_publish(#{ publish := true } = P) ->
     metaparticle_docker:publish(P);
 maybe_publish(_P) -> ok.
 

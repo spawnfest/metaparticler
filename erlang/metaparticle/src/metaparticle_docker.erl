@@ -2,15 +2,20 @@
 
 %% TODO: consider erlexec to attach to standard out/standard error better
 
+%% builder
 -export([
     write_dockerfile/1,
-    build/2,
-    publish/1,
-    run/4,
-    cancel/1
+    build/1,
+    publish/1
 ]).
 
-build(#{ repository := Repo } = P) ->
+%% runner
+-export([
+    run/2,
+    cancel/2
+]).
+
+build(P) ->
     NewP = case maps:is_key(name, P) of
                true -> P;
 	       false -> 
@@ -34,7 +39,7 @@ write_dockerfile(P) ->
 COPY ./ /{{name}}/
 WORKDIR /{{name}}
 RUN rebar3 as {{env}} release
-CMD [\"/{{name}}/_build/{{env}}/rel/{{name}}/bin/{{name}}\"]">>
+CMD [\"/{{name}}/_build/{{env}}/rel/{{name}}/bin/{{name}}\"]">>,
     
     Out = bbmustache:render(Template, NewP),
     ok = file:write_file("Dockerfile", Out),
