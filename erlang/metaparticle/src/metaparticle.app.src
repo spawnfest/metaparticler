@@ -1,0 +1,16 @@
+{application, metaparticle,
+ [{description, "Erlang implementation of metaparticle"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib,
+    bbmustache
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, ["Mark Allen"]},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
