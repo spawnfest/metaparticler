@@ -16,8 +16,9 @@ Example
 Consider the simple Erlang application of
 
 ```erlang
-start() ->
-    io:format("Hello ~s", ["World"]).
+start(_, _) ->
+    io:format("Hello ~s", ["World"]),
+    {ok, self()}.
 ```
 
 To containerize and deploy this application requires a developer learn and
@@ -26,7 +27,7 @@ abstraction that allows a developer to use these tools from the context of
 Erlang.
 
 ```erlang
-start() ->
+start(_, _) ->
     Runtime = #{ executor => docker },
 
     Package = #{ builder => docker,
@@ -40,13 +41,15 @@ start() ->
     metaparticle:containerize(Runtime, Package, fun do_start/0).
 
 do_start() ->
-    io:format("Hello ~s", ["World"]).
-
+    io:format("Hello ~s", ["World"]),
+    {ok, self()}.
 ```
 
 Using the `ports` key in the runtime map, we can tell the runtime environment
 what ports on a container we should expose so that the they are available to
 interact with the code running in the container itself.
+
+See also the [example][5]
 
 Use
 ---
@@ -83,7 +86,10 @@ TODO
 * Extending the runtime environments to support things other than docker, including
   kubernetes, azure, and AWS.
 
+* Write an example using cowboy.
+
 [1]: https://metaparticle.io/
 [2]: https://saleyn.github.io/erlexec/
 [3]: https://get.docker.io/
 [4]: http://www.rebar3.org/v3.0/docs/releases
+[5]: https://github.com/spawnfest/metaparticler/blob/master/erlang/metaparticle/src/metaparticle_example.erl
