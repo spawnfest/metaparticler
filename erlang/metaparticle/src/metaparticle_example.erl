@@ -3,9 +3,14 @@
 -export([start/0, start/2, stop/1]).
 
 %% required OTP application callbacks.
-start(_, _) -> 
-    start(), 
-    {ok, self()}.
+start(_, _) ->
+    start(),
+    case metaparticle:in_docker_container() of
+        true ->
+            {ok, self()};
+        false ->
+            {error, shutdown}
+    end.
 
 stop(_) -> ok.
 

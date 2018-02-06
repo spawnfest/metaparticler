@@ -18,7 +18,7 @@
 build(P) ->
     NewP = case maps:is_key(name, P) of
                true -> P;
-	       false -> 
+	       false ->
 	           {ok, D} = file:get_cwd(),
                    N = filename:basename(D),
                    P#{ name => N }
@@ -48,7 +48,7 @@ CMD [\"/{{name}}/_build/default/rel/{{name}}/bin/{{name}}\", \"start\"]">>,
 
 %% This function makes a temporary map just for templating
 binmap(M) ->
-    M0 = lists:foldl(fun(K, Acc) -> 
+    M0 = lists:foldl(fun(K, Acc) ->
 		    V = maps:get(K, M),
 		    maps:put(atom_to_list(K), V, Acc)
 		end,
@@ -62,7 +62,7 @@ to_binary(X) when is_atom(X) -> atom_to_binary(X, utf8);
 to_binary(X) when is_binary(X) -> X.
 
 validate_package_map(P) ->
-    lists:foldl(fun present_or_default/2, P, 
+    lists:foldl(fun present_or_default/2, P,
 		[otp_version, env]).
 
 present_or_default(K, M) ->
@@ -89,7 +89,7 @@ cancel(_Runtime, #{ name := Name }) ->
 run(Runtime, #{ name := N, image := I }) ->
     Ports = maybe_make_ports(Runtime),
     os:cmd("docker run -rm -e METAPARTICLE_IN_CONTAINER=1 --name " ++ N ++ " " 
-            ++ Ports 
+            ++ Ports
 	    ++ " -d " ++ I),
     os:cmd("docker logs -f " ++ I).
 
@@ -106,6 +106,3 @@ make_ports(Ports) ->
 		    end,
 		    [], Ports),
     lists:flatten(lists:reverse(P)).
-    
-    
-    

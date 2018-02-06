@@ -12,7 +12,7 @@
 % executor (the execution environment; one of 'docker', etc)
 %
 % package
-% repository binary 
+% repository binary
 % builder 'docker' atom
 % verbose bool
 % quiet bool
@@ -20,14 +20,14 @@
 
 -define(CGROUP_FILE, "/proc/1/cgroup").
 -define(DOCKER_TYPES, [<<"docker">>, <<"kubepods">>]).
-
+-define(READ_CHUNK, 2048).
 %%====================================================================
 %% API functions
 %%====================================================================
 containerize(Runtime, Package, Fun) ->
      case in_docker_container() of
          true -> Fun();
-	 false -> 
+	 false ->
             NewP = build_container(Package),
 	    _ = maybe_publish(NewP),
 	    _ = run_container(Runtime, NewP)
@@ -50,12 +50,26 @@ check_filesystem() ->
     end.
 
 read_cgroup_data() ->
-    {ok, Data} = file:read_file(?CGROUP_FILE),
+    %% file:read_file won't read files with 0 length
+    %% see https://github.com/erlang/otp/pull/1524
+    {ok, FD} = file:open(?CGROUP_FILE, [binary, read]),
+    Data = read_file(FD),
     Parts = binary:split(Data, <<"\n">>, [global, trim]),
-    lists:any(fun(E) -> lists:member(E, ?DOCKER_TYPES) end, 
+    lists:any(fun(E) -> lists:member(E, ?DOCKER_TYPES) end,
               Parts).
 
-build_container(#{ builder := docker } = P) -> 
+read_file(FD) ->
+    fold_chunks(FD, <<>>).
+
+fold_chunks(FD, Acc) ->
+    case file:read(FD, ?READ_CHUNK) of
+	{ok, Data} ->
+	    fold_chunks(FD, << Acc/binary, Data/binary >>);
+	eof ->
+	    Acc
+    end.
+
+build_container(#{ builder := docker } = P) ->
     metaparticle_docker:build(P);
 build_container(#{ builder := Builder }) ->
     erlang:error({error, invalid_builder}, [Builder]);
